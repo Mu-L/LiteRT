@@ -36,11 +36,11 @@
 #include "litert/runtime/accelerators/dispatch/dispatch_accelerator.h"
 #endif  // !defined(LITERT_DISABLE_NPU)
 
-extern "C" {
+#if !defined(LITERT_DISABLE_CPU)
+extern "C" LiteRtAcceleratorDef LiteRtCpuAcceleratorImpl;
+#endif  // !defined(LITERT_DISABLE_CPU)
 
-// Define a data pointer to an accelerator definition. This pointer is updated
-// by statically linked CPU (XNNPack) accelerator.
-LiteRtAcceleratorDef* LiteRtStaticLinkedAcceleratorCpuDef = nullptr;
+extern "C" {
 
 // Define a data pointer to an accelerator definition. This pointer is updated
 // by statically linked GPU accelerator.
@@ -276,17 +276,19 @@ Expected<void> TriggerAcceleratorAutomaticRegistration(
 #endif
 
   // Register the CPU accelerator.
-  if (LiteRtStaticLinkedAcceleratorCpuDef != nullptr) {
-    if (auto status = RegisterAccelerator(&environment,
-                                          LiteRtStaticLinkedAcceleratorCpuDef);
-        status == kLiteRtStatusOk) {
-      LITERT_LOG(LITERT_INFO, "CPU accelerator registered.");
-    } else {
-      LITERT_LOG(LITERT_WARNING,
-                 "CPU accelerator could not be loaded and registered: %s.",
-                 LiteRtGetStatusString(status));
-    }
+#if !defined(LITERT_DISABLE_CPU)
+  if (auto status =
+          RegisterAccelerator(&environment, &LiteRtCpuAcceleratorImpl);
+      status == kLiteRtStatusOk) {
+    LITERT_LOG(LITERT_INFO, "CPU accelerator registered.");
+  } else {
+    LITERT_LOG(LITERT_WARNING,
+               "CPU accelerator could not be loaded and registered: %s.",
+               LiteRtGetStatusString(status));
   }
+#else
+  LITERT_LOG(LITERT_VERBOSE, "CPU accelerator registration disabled.");
+#endif
 
   return {};
 };

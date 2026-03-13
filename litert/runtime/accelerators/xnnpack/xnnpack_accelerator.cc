@@ -156,20 +156,4 @@ LiteRtAcceleratorDef LiteRtCpuAcceleratorImpl = {
     .num_supported_buffer_types = 0,
 };
 
-// Accelerator definition pointer defined in auto_registration.cc.
-extern LiteRtAcceleratorDef* LiteRtStaticLinkedAcceleratorCpuDef;
-
 }  // extern "C"
-
-namespace {
-
-class StaticCpuAcceleratorInitializer {
- public:
-  StaticCpuAcceleratorInitializer() {
-    LiteRtStaticLinkedAcceleratorCpuDef = &LiteRtCpuAcceleratorImpl;
-  }
-};
-
-StaticCpuAcceleratorInitializer g_cpu_accelerator_initializer;
-
-}  // namespace

@@ -37,7 +37,12 @@ cc_library(
         "//litert/core:environment",
         "//litert/runtime/accelerators/dispatch:dispatch_accelerator",
         "@com_google_absl//absl/strings",
-    ],
+    ] + select({
+        "//litert/build_common:litert_disable_cpu": [],
+        "//conditions:default": [
+            "//litert/runtime/accelerators/xnnpack:xnnpack_accelerator",
+        ],
+    }),
 )
 
 cc_library(
